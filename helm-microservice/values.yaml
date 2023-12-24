@@ -1,0 +1,89 @@
+########################################
+## CONFIG | Airflow Configs
+## https://github.com/bitnami/containers/tree/main/bitnami/airflow#configuration
+########################################
+
+config:
+  release:
+    helmName: test-airflow
+    helmNamespace: test-airflow
+  namespace: test-airflow
+  loadExample: "False"
+  executor: KubernetesExecutor
+  parallelism: 1
+  fernetKey: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+  image:
+    repository: cartertsai/dags-test
+    tag: 0.0.4
+  db:
+    host: postgres
+    port: 5432
+    dbName: airflow
+    dbUser: airflow
+    dbPw: airflow
+
+airflow:
+  replicas: 1
+  image:
+    # registry: hub.docker.com
+    repository: bitnami/airflow
+    tag: 2-debian-11
+    pullPolicy: IfNotPresent
+    uid: 1000650000
+    gid: 0
+
+  env:
+    executor: KubernetesExecutor
+    fernetKey: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+    secretKey: a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    airflowEmail: hamming0324@gamil.com
+    airflowPassword: user
+    airflowUser: user
+    
+    db:
+      host: postgres
+      port: 5432
+      dbName: airflow
+      dbUser: airflow
+      dbPw: airflow
+
+scheduler:
+  replicas: 1
+  image:
+    # registry: hub.docker.com
+    # repository: bitnami/airflow-scheduler
+    # tag: 2-debian-11
+    repository: cartertsai/dags-test
+    tag: 0.0.4
+    pullPolicy: IfNotPresent
+    uid: 1000650000
+    gid: 0
+
+  env:
+    executor: KubernetesExecutor
+    fernetKey: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+    secretKey: a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    webHost: airflow
+    websPort: "8080"
+    db:
+      host: postgres
+      port: 5432
+      dbName: airflow
+      dbUser: airflow
+      dbPw: airflow
+
+postgres:
+  ## if the `stable/postgresql` chart is used
+  ## - [WARNING] the embedded Postgres is NOT SUITABLE for production deployments of Airflow
+  ## - [WARNING] consider using an external database with `externalDatabase.*`
+  ## - set to `false` if using `externalDatabase.*`
+  ##
+  enabled: true
+  image:
+    # registry: hub.docker.com
+    repository: bitnami/postgresql
+    tag: 15.3.0
+    pullPolicy: IfNotPresent
+  securityContext:
+    uid: 1000650000
+    gid: 0

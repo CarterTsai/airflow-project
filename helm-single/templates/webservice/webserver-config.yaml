@@ -1,0 +1,38 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "airflow-config"
+  labels:
+    app: airflow-config
+data:
+  airflow.cfg: |
+    apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: "airflow-config"
+data:
+  airflow.cfg: |
+    [core]
+    dags_folder = /opt/bitnami/airflow/dags
+    executor = {{ .Values.config.executor }}
+    load_examples = {{ .Values.config.loadExample }}
+    load_default_connections = False
+    # ui to hide sensitive variable fields when set to true
+    hide_sensitive_variable_fields = True
+    parallelism = {{ .Values.config.parallelism }}
+    min_file_process_interval = 5
+    dag_dir_list_interval = 60
+
+    [logging]
+    remote_logging = false
+    base_log_folder = /opt/bitnami/airflow/logs
+    
+    [kubernetes]
+    namespace =  {{ .Release.Namespace }}
+    pod_template_file = /opt/bitnami/airflow/pod-template.yaml
+    worker_container_repository = {{ .Values.config.image.repository }}
+    worker_container_tag = {{ .Values.config.image.tag }}
+    delete_worker_pods = True
+    in_cluster = True
+    # https://airflow.apache.org/docs/apache-airflow/stable/configurations-ref.html#worker-pods-creation-batch-size
+    worker_pods_creation_batch_size = 2

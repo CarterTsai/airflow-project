@@ -1,0 +1,17 @@
+########################################
+## CONFIG | Airflow Configs
+## https://github.com/bitnami/containers/tree/main/bitnami/airflow#configuration
+########################################
+
+config:
+  airflowLogs:
+    storageClassName: crc-csi-hostpath-provisioner
+
+  airflowDags:
+    storageClassName: crc-csi-hostpath-provisioner
+
+  sparkDags:
+    storageClassName: crc-csi-hostpath-provisioner
+
+  metadata:
+    storageClassName: crc-csi-hostpath-provisioner

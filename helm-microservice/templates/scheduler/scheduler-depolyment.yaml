@@ -1,0 +1,92 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow-scheduler
+  labels:
+    app: airflow-scheduler
+spec:
+  replicas: {{ .Values.scheduler.replicas }}
+  selector:
+    matchLabels:
+      app: airflow
+      component: scheduler
+  template:
+    metadata:
+      labels:
+        app: airflow
+        component: scheduler
+    spec:
+      serviceAccountName: task-pods-serviceaccount
+      securityContext:         # Pod level
+        runAsUser: {{ .Values.scheduler.image.uid }}
+        runAsGroup: {{ .Values.scheduler.image.gid }}
+      containers:
+        - name: scheduler
+          {{- include "scheduler.image" . | indent 10 }}
+          securityContext:         # Pod level
+            runAsUser: {{ .Values.scheduler.image.uid }}
+            runAsGroup: {{ .Values.scheduler.image.gid }}
+          env:
+            - name: AIRFLOW_EXECUTOR
+              value: {{ .Values.scheduler.env.executor }}
+            - name: AIRFLOW_DATABASE_HOST
+              value: {{ .Values.scheduler.env.db.host }}
+            - name: AIRFLOW_DATABASE_PORT_NUMBER
+              value: {{ .Values.scheduler.env.db.port | quote }}
+            - name: AIRFLOW_DATABASE_NAME
+              value: {{ .Values.scheduler.env.db.dbName }}
+            - name: AIRFLOW_DATABASE_USERNAME
+              value: {{ .Values.scheduler.env.db.dbUser }}
+            - name: AIRFLOW_DATABASE_PASSWORD
+              value: {{ .Values.scheduler.env.db.dbPw }}
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              value: postgres+psycopg2://{{ .Values.scheduler.env.db.dbUser }}:{{ .Values.scheduler.env.db.dbPw }}@{{ .Values.scheduler.env.db.host }}:{{ .Values.scheduler.env.db.port}}/{{ .Values.scheduler.env.db.dbName }}
+            - name: AIRFLOW_WEBSERVER_HOST
+              value: {{ .Values.scheduler.env.webHost }}
+            - name: AIRFLOW_WEBSERVER_PORT_NUMBER
+              value:  {{ .Values.scheduler.env.websPort | quote }}
+            - name: AIRFLOW__CORE__FERNET_KEY
+              value: {{ .Values.scheduler.env.fernetKey }}
+            - name: AIRFLOW_SECRET_KEY
+              value: {{ .Values.scheduler.env.secretKey }}
+          ports:
+            - containerPort: 8793
+          volumeMounts:
+            - name: airflow-logs
+              mountPath: /opt/bitnami/airflow/logs
+            - name: airflow-config
+              mountPath: /opt/bitnami/airflow/airflow.cfg
+              subPath: airflow.cfg
+              readOnly: true
+            - name: pod-template-config
+              mountPath: /opt/bitnami/airflow/pod-template.yaml
+              subPath: pod_template.yaml
+      volumes:
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pv-claim       
+        - name: airflow-config
+          configMap:
+            name: airflow-config
+        - name: pod-template-config
+          configMap:
+            name: pod-template-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow-scheduler
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Namespace }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app: airflow-scheduler
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8793
+      targetPort: 8793
+  selector:
+    app: airflow-scheduler

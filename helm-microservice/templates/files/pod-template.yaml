@@ -1,0 +1,68 @@
+# template for KubernetesPodOperator
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pod-template-config
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Namespace }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app: pod-template-config
+    app.kubernetes.io/managed-by: Helm
+data:
+  pod_template.yaml: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: dummy-name
+    spec:
+      containers:
+        - args: [ ]
+          command: [ ]
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__FERNET_KEY
+              value: {{ .Values.config.fernetKey }}
+            - name: DB_HOST
+              value: {{ .Values.config.db.host }}
+            - name: DB_DATABASE
+              value: {{ .Values.config.db.dbName }}
+            - name: DB_USER
+              value: {{ .Values.config.db.dbUser }}
+            - name: DB_PASSWORD
+              value: {{ .Values.config.db.dbPw }}
+            - name: AIRFLOW__DATABASE__SQL_ALCHEMY_CONN
+              value: postgres+psycopg2://{{ .Values.config.db.dbUser }}:{{ .Values.config.db.dbPw }}@{{ .Values.config.db.host }}:{{ .Values.config.db.port}}/{{ .Values.config.db.dbName }}
+          image: dummy_image
+          imagePullPolicy: IfNotPresent
+          name: base
+          volumeMounts:
+            - mountPath: /opt/bitnami/airflow/logs
+              name: airflow-logs
+              readOnly: false
+            - name: airflow-config
+              mountPath: /opt/bitnami/airflow/airflow.cfg
+              subPath: airflow.cfg
+              readOnly: true
+          # resources:
+          #   requests:
+          #     cpu: "250m"
+          #   limits:
+          #     cpu: "500m"
+
+      hostNetwork: false
+      restartPolicy: Never
+      securityContext:
+        runAsUser: {{ .Values.scheduler.image.uid }}
+        runAsGroup: {{ .Values.scheduler.image.gid }}
+      nodeSelector: { }
+      affinity: { }
+      tolerations: [ ]
+      volumes:
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pv-claim
+        - name: airflow-config  
+          configMap:
+            name: airflow-config

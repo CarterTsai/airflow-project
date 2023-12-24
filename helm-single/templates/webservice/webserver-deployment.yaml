@@ -1,0 +1,108 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: airflow
+  labels:
+    app: airflow
+spec:
+  replicas: {{ .Values.airflow.replicas }}
+  selector:
+    matchLabels:
+      app: airflow
+  template:
+    metadata:
+      labels:
+        app: airflow
+    spec:
+      serviceAccountName: task-pods-serviceaccount
+      securityContext:         # Pod level
+        runAsUser: {{ .Values.airflow.image.uid }}
+        runAsGroup: {{ .Values.airflow.image.gid }}
+      containers:
+        - name: airflow
+          {{- include "airflow.image" . | indent 10 }}
+          securityContext:         # Pod level
+            runAsUser: {{ .Values.airflow.image.uid }}
+            runAsGroup: {{ .Values.airflow.image.gid }}
+          ports:
+            - containerPort: 8080
+          env:
+            - name: AIRFLOW_EXECUTOR
+              value: {{ .Values.airflow.executor }}
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              value: postgres+psycopg2://{{ .Values.config.db.dbUser }}:{{ .Values.config.db.dbPw }}@{{ .Values.config.db.host }}:{{ .Values.config.db.port}}/{{ .Values.config.db.dbName }}
+            - name: AIRFLOW_USERNAME
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secret
+                  key: username
+            - name: AIRFLOW_EMAIL
+              value: {{ .Values.airflow.env.airflowEmail }}
+            - name: AIRFLOW_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: airflow-secret
+                  key: password
+            - name: AIRFLOW_FERNET_KEY
+              value: {{ .Values.airflow.env.fernetKey }}
+            - name: AIRFLOW_SECRET_KEY
+              value: {{ .Values.airflow.env.secretKey }}
+            - name: AIRFLOW_DATABASE_HOST
+              value: {{ .Values.config.db.host }}
+            - name: AIRFLOW_DATABASE_NAME
+              value: {{ .Values.config.db.dbName }}
+            - name: AIRFLOW_DATABASE_USERNAME
+              value: {{ .Values.config.db.dbUser }}
+            - name: AIRFLOW_DATABASE_PASSWORD
+              value: {{ .Values.config.db.dbPw }}
+            - name: SPARK_HOME
+              value: {{ .Values.airflow.env.spark_home }}
+          volumeMounts:
+            - mountPath: /opt/bitnami/airflow/dags
+              name: airflow-dags
+            - mountPath: /spark/dags/
+              name: spark-dags
+            - mountPath: /opt/bitnami/airflow/logs
+              name: airflow-logs
+            - name: airflow-config
+              mountPath: /opt/bitnami/airflow/airflow.cfg
+              subPath: airflow.cfg
+              readOnly: true
+            - name: pod-template-config
+              mountPath: /opt/bitnami/airflow/pod-template.yaml
+              subPath: pod_template.yaml
+      volumes:
+        - name: spark-dags
+          persistentVolumeClaim:
+            claimName: spark-dags-pv-claim
+        - name: airflow-dags
+          persistentVolumeClaim:
+            claimName: airflow-dags-pv-claim 
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pv-claim
+        - name: airflow-config
+          configMap:
+            name: airflow-config
+        - name: pod-template-config
+          configMap:
+            name: pod-template-config
+---
+apiVersion: v1
+kind: Service
+metadata:
+  name: airflow
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Namespace }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app: airflow
+    app.kubernetes.io/managed-by: Helm
+spec:
+  type: NodePort
+  ports:
+    - protocol: TCP
+      port: 8080
+      targetPort: 8080
+  selector:
+    app: airflow

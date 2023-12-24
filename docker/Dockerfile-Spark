@@ -1,0 +1,27 @@
+# 請參考https://github.com/CarterTsai/train-spark
+
+# FROM apache/spark:python3 as build
+
+# LABEL maintainer="Carter Tsai <Carter.Tsai@ibm.com" \
+#       com.project.image.base.name="docker.io/apache/spark:python3" \
+#       com.project.image.created="2023-08-07T16:48:17Z" \
+#       com.project.image.description="spark image" \
+#       com.project.image.licenses="Apache-2.0" \
+#       com.project.image.ref.name="" \
+#       com.project.image.title="spark" \
+#       com.project.image.vendor="." \
+#       com.project.image.version="0.0.1"
+
+# USER root
+
+# # 設置環境變數
+# RUN apt-get autoremove -yqq --purge && apt-get clean && \
+#       apt-get update && apt-get -y upgrade
+
+# # 複製 requirements.txt 並安裝所有依賴項
+# COPY ./config/requirements.txt /opt/spark
+
+# # RUN pip install --no-cache-dir -r /opt/bitnami/airflow/venv/requirements.txt
+# RUN pip install --no-cache-dir -r /opt/spark/requirements.txt
+
+# USER spark

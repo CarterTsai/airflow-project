@@ -1,0 +1,22 @@
+apiVersion: v2
+appVersion: 2.5.3
+# dependencies:
+# - name: postgres
+#   repository: "file://charts/postgres"
+#   version: 0.0.1
+#   # condition: postgres.enabled
+
+description: Airflow Helm Chart
+home: https://github.com/airflow-helm/charts/tree/main/charts/airflow
+icon: https://avatars.githubusercontent.com/u/71061241
+keywords:
+- airflow
+- dag
+- workflow
+maintainers:
+- name: Carter tsai
+  url: 
+name: airflow
+sources:
+- https://github.com/airflow-helm/charts/tree/main/charts/airflow
+version: 0.0.1

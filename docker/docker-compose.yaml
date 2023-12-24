@@ -1,0 +1,56 @@
+version: '3'
+services:
+  airflow:
+    build: .
+    image: airflow-test-all:1.0.6
+    environment:
+      - AIRFLOW_EXECUTOR=SequentialExecutor
+      - AIRFLOW_DATABASE_HOST=postgresql
+      - AIRFLOW_DATABASE_NAME=airflow
+      - AIRFLOW_DATABASE_USERNAME=postgre
+      - AIRFLOW_DATABASE_PASSWORD=1qaz2wsx
+      - AIRFLOW_LOAD_EXAMPLES="TRUE"
+      - AIRFLOW_USERNAME=airflow
+      - AIRFLOW_PASSWORD=airflow
+      - AIRFLOW_EMAIL=hamming0324@gmail.com
+      - AIRFLOW_FERNET_KEY=46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
+      - AIRFLOW_SECRET_KEY=a25mQ1FHTUh3MnFRSk5KMEIyVVU2YmN0VGRyYTVXY08=
+    ports:
+      - "8080:8080"
+    networks:
+      - airflow
+
+  # spark:
+  #   build: 
+  #     context: .
+  #     dockerfile: ./Dockerfile-Spark
+  #   image: spark-all:0.0.1
+  #   ports:
+  #     - "8080:8080"
+  #     - "7077:7077"
+  #   networks:
+  #     - airflow
+      
+  postgresql:
+    image: postgres:15
+    environment:
+      POSTGRES_USER: postgre
+      POSTGRES_PASSWORD: 1qaz2wsx
+      POSTGRES_DB: airflow
+    volumes:
+      - postgres-db-volume:/var/lib/postgresql/data
+    healthcheck:
+      test: ["CMD", "pg_isready", "-U", "airflow"]
+      interval: 5s
+      retries: 5
+    restart: always
+    ports:
+      - "5432:5432"
+    networks:
+      - airflow
+
+volumes:
+  postgres-db-volume:
+
+networks:
+  airflow:

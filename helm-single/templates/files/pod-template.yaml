@@ -1,0 +1,69 @@
+# template for KubernetesPodOperator
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: pod-template-config
+  annotations:
+    meta.helm.sh/release-name: {{ .Release.Namespace }}
+    meta.helm.sh/release-namespace: {{ .Release.Namespace }}
+  labels:
+    app: pod-template-config
+    app.kubernetes.io/managed-by: Helm
+data:
+  pod_template.yaml: |
+    apiVersion: v1
+    kind: Pod
+    metadata:
+      name: dummy-name
+    spec:
+      serviceAccountName: task-pods-serviceaccount
+      containers:
+        - args: [ ]
+          command: [ ]
+          env:
+            - name: AIRFLOW__CORE__EXECUTOR
+              value: LocalExecutor
+            - name: AIRFLOW__CORE__FERNET_KEY
+              value: {{ .Values.config.fernetKey }}
+            - name: AIRFLOW_DATABASE_HOST
+              value: {{ .Values.config.db.host }}
+            - name: AIRFLOW_DATABASE_NAME
+              value: {{ .Values.config.db.dbName }}
+            - name: AIRFLOW_DATABASE_USERNAME
+              value: {{ .Values.config.db.dbUser }}
+            - name: AIRFLOW_DATABASE_PASSWORD
+              value: {{ .Values.config.db.dbPw }}
+            - name: AIRFLOW__CORE__SQL_ALCHEMY_CONN
+              value: postgres+psycopg2://{{ .Values.config.db.dbUser }}:{{ .Values.config.db.dbPw }}@{{ .Values.config.db.host }}:{{ .Values.config.db.port}}/{{ .Values.config.db.dbName }}
+          image: dummy_image
+          imagePullPolicy: IfNotPresent
+          name: base
+          volumeMounts:
+            - mountPath: /opt/bitnami/airflow/dags
+              name: airflow-dags
+            - mountPath: /opt/bitnami/airflow/logs
+              name: airflow-logs
+              readOnly: false
+            - name: airflow-config
+              mountPath: /opt/bitnami/airflow/airflow.cfg
+              subPath: airflow.cfg
+              readOnly: true
+
+      hostNetwork: false
+      restartPolicy: Never
+      securityContext:
+        runAsUser: {{ .Values.airflow.image.uid }}
+        runAsGroup: {{ .Values.airflow.image.gid }}
+      nodeSelector: { }
+      affinity: { }
+      tolerations: [ ]
+      volumes:
+        - name: airflow-dags
+          persistentVolumeClaim:
+            claimName: airflow-dags-pv-claim 
+        - name: airflow-logs
+          persistentVolumeClaim:
+            claimName: airflow-logs-pv-claim
+        - name: airflow-config  
+          configMap:
+            name: airflow-config
