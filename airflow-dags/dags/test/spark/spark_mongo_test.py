@@ -21,10 +21,10 @@ spark = SparkSession \
     .getOrCreate()
 
 df = spark.read \
-    .format("mongodb") \
+    .format("mongo") \
     .option("spark.mongodb.read.database", "test") \
     .option("spark.mongodb.read.collection", "cart") \
     .option("spark.mongodb.read.connection.uri", "mongodb://test:test@172.27.48.1:27017/test.cart") \
     .load()
 
-print(df)
+df.show()
