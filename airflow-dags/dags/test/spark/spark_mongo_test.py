@@ -3,8 +3,7 @@ from pyspark.sql.functions import col, struct, explode, lit, collect_list, max, 
 from pyspark.sql.window import Window
 import os
 
-mongodb_uri = "mongodb://test:test@172.27.48.1:27017/test.cart" 
-
+mongodb_uri = "mongodb://test:test@172.27.48.1:27017/test.cart"
 
 spark = SparkSession \
     .builder \
@@ -19,7 +18,6 @@ spark = SparkSession \
     .appName("myApp") \
     .config("spark.mongodb.input.uri", mongodb_uri) \
     .config("spark.mongodb.output.uri", mongodb_uri) \
-    .config('spark.driver.extraClassPath', '/opt/spark/jars/*') \
     .getOrCreate()
 
 df = spark.read \
@@ -29,4 +27,4 @@ df = spark.read \
     .option("spark.mongodb.read.connection.uri", "mongodb://test:test@172.27.48.1:27017/test.cart") \
     .load()
 
-df.show()
+print(df)

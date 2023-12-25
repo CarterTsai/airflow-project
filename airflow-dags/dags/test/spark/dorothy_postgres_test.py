@@ -1,12 +1,8 @@
 from pyspark.sql import SparkSession
 import os
 
-# dirname = os.path.dirname(__file__)
-# print(dirname)
-jar_path = '/usr/local/bin/postgresql-42.5.1.jar'
 spark = SparkSession.builder\
         .appName('test')\
-        .config("spark.jars", jar_path)\
         .getOrCreate()
 
 def read_table_query(sql_query):
@@ -19,11 +15,11 @@ def read_table_query(sql_query):
             .load()
     return df
 
-POSTGRESQL_USER = 'ap_user'
-POSTGRESQL_PASSWORD = 'gszmHNMM'
-postgres_db = 'edp'
-database_url = f"jdbc:postgresql://emi-pgbouncer:5432/{postgres_db}"
+POSTGRESQL_USER = 'postgre'
+POSTGRESQL_PASSWORD = '1qaz2wsx'
+postgres_db = 'airflow'
+database_url = f"jdbc:postgresql://172.27.48.1:5432/{postgres_db}"
 jdbc_driver = "org.postgresql.Driver"
-ans = read_table_query('select * from vw_ds_order')
+ans = read_table_query('select * from public.ab_permission')
 
-print(ans)
+ans.show()
