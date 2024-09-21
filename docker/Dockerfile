@@ -1,4 +1,4 @@
-FROM bitnami/airflow:2-debian-11 as build
+FROM bitnami/airflow:2-debian-12 as build
 
 LABEL maintainer="Carter Tsai <Carter.Tsai@ibm.com" \
       com.project.image.base.name="docker.io/apache/airflow:2.6.3-python3.9" \
@@ -13,7 +13,7 @@ LABEL maintainer="Carter Tsai <Carter.Tsai@ibm.com" \
 USER root
 
 # 設置環境變數
-ENV SPARK_VERSION=3.5.0
+ENV SPARK_VERSION=3.5.3
 ENV HADOOP_VERSION=3
 ENV JAVA_VERSION=17
 ENV JAVA_HOME=/usr/lib/jvm/java-$JAVA_VERSION-openjdk-amd64

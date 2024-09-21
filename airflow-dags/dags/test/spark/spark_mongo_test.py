@@ -22,9 +22,9 @@ spark = SparkSession \
 
 df = spark.read \
     .format("mongo") \
-    .option("spark.mongodb.read.database", "test") \
-    .option("spark.mongodb.read.collection", "cart") \
-    .option("spark.mongodb.read.connection.uri", "mongodb://test:test@172.27.48.1:27017/test.cart") \
+    .option("spark.mongodb.input.database", "test") \
+    .option("spark.mongodb.input.collection", "cart") \
+    .option("spark.mongodb.input.connection.uri", "mongodb://test:test@172.27.48.1:27017/test.cart") \
     .load()
 
 df.show()

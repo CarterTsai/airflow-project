@@ -1,8 +1,7 @@
-version: '3'
 services:
   airflow:
     build: .
-    image: airflow-test-all:1.0.6
+    image: airflow-test-all:2.0.1
     environment:
       - AIRFLOW_EXECUTOR=SequentialExecutor
       - AIRFLOW_DATABASE_HOST=postgresql
