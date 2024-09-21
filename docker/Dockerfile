@@ -41,6 +41,8 @@ ENV SPARK_HOME=/spark
 
 COPY ./config/run.sh /opt/bitnami/scripts/airflow/run.sh
 
+RUN apt-get install curl -y
+
 USER 1001
 
 CMD ["/opt/bitnami/scripts/airflow/run.sh"]
