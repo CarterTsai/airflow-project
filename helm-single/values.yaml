@@ -15,7 +15,7 @@ config:
   fernetKey: 46BKJoQYlPPOexq0OhDZnIlNepKFf87WFwLbfzqDDho=
   image:
     repository: cartertsai/airflow-test-all
-    tag: 1.0.6
+    tag: 2.0.2
   db:
     host: metadata
     port: 5432
@@ -37,9 +37,9 @@ airflow:
   image:
     # registry: hub.docker.com
     repository: cartertsai/airflow-test-all
-    tag: 1.0.6
+    tag: 2.0.2
     pullPolicy: IfNotPresent
-    uid: 1000650000
+    uid: 1000660000
     gid: 0
 
   env:
@@ -62,11 +62,11 @@ metadata:
   image:
     # registry: hub.docker.com
     repository: bitnami/postgresql
-    tag: 15.4.0
+    tag: 15.8.0
     pullPolicy: IfNotPresent
   
   securityContext:
-    uid: 1000650000
+    uid: 1000660000
     gid: 0
 
 spark:
